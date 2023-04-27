@@ -100,7 +100,7 @@ def download_dats(folder_helper):
         if name in ('MAME'):
             for file in files:
                 file = os.path.join(path, file)
-                if ('Software List' in file and not 'dir2dat' in file) \
+                if ('Software List' in file and 'dir2dat' not in file) \
                     or 'EXTRA' in file:
                     new_path = os.path.join(path, Path(file).stem)
                     os.makedirs(new_path, exist_ok=True)
