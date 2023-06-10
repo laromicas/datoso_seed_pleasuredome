@@ -1,10 +1,10 @@
-from datoso_seed_pleasuredome.dats import FruitMachinesDat, HomeBrewMameDat, mame_dat_factory
+from datoso_seed_pleasuredome.dats import FruitMachinesXMLDat, HomeBrewMameDat, mame_dat_factory, fruit_machine_factory
 
 actions = {
     '{dat_origin}/FruitMachines': [
         {
             'action': 'LoadDatFile',
-            '_class': FruitMachinesDat
+            '_factory': fruit_machine_factory
         },
         {
             'action': 'DeleteOld'

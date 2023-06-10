@@ -5,8 +5,10 @@ import os
 import re
 import json
 from pathlib import Path
+import logging
+from datoso.helpers import FileHeaders
 
-from datoso.repositories.dat import XMLDatFile, DirMultiDatFile
+from datoso.repositories.dat import XMLDatFile, ClrMameProDatFile, DirMultiDatFile
 # pylint: disable=attribute-defined-outside-init,unsupported-membership-test
 
 
@@ -100,7 +102,57 @@ class HomeBrewMameDat(XMLDatFile):
         return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
 
 
-class FruitMachinesDat(XMLDatFile):
+def fruit_machine_factory(file: str):
+    """ Fruit Dat factory. """
+    # Read first 5 chars of file to determine type
+    with open(file, 'r', encoding='utf-8') as file:
+        file_header = file.read(5)
+    if file_header == FileHeaders.XML.value:
+        return FruitMachinesXMLDat
+    if file_header == FileHeaders.CLRMAMEPRO.value:
+        return FruitMachinesClrMameDat
+    logging.error(f'Unknown Fruit Machine Dat file: {file}')
+    return None
+
+class FruitMachinesXMLDat(XMLDatFile):
+    """ Fruit Machines Dat class. """
+
+    def load_metadata_file(self):
+        """ Load the metadata file. """
+        basedir = Path(self.file).parents[0]
+        filename = os.path.join(basedir, 'metadata.txt')
+        if os.path.exists(filename):
+            with open(filename, encoding='utf-8') as file:
+                metadata = json.load(file)
+        return metadata
+
+
+    def initial_parse(self):
+        # pylint: disable=R0801
+        """ Parse the dat file. """
+        name = self.name
+        extra_data = self.load_metadata_file()
+
+        name = name.split('(')[0].strip()
+        if 'Layouts' in self.file:
+            self.suffix = 'Layouts'
+
+        self.company = 'Fruit'
+        self.system = extra_data['folder']
+
+        self.preffix = 'Arcade'
+
+        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+
+
+    def get_date(self):
+        """ Get the date from the dat file. """
+        if self.file and '(' in self.file:
+            file = str(self.file)
+            self.date = file[file.find("(")+1:file.find(")")]
+        return self.date
+
+class FruitMachinesClrMameDat(ClrMameProDatFile):
     """ Fruit Machines Dat class. """
 
     def load_metadata_file(self):
