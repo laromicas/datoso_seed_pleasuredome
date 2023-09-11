@@ -3,11 +3,11 @@ from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
-import shutil
 import urllib.request
 import zipfile
 from urllib.parse import urljoin
 import dateutil.parser
+from datoso.helpers import downloader
 from datoso.configuration.folder_helper import Folders
 from datoso_seed_pleasuredome import __preffix__
 
@@ -57,9 +57,7 @@ def download_dats(folder_helper):
 
     def download_dat(href, folder):
         filename = Path(href).name.replace('%20', ' ')
-        tmp_filename, headers = urllib.request.urlretrieve(href)
-        local_filename = os.path.join(folder_helper.dats, folder, filename)
-        shutil.move(tmp_filename, local_filename)
+        downloader(url=href, destination=os.path.join(folder_helper.dats, folder, filename), reporthook=None)
 
     def extract_date(filename):
         datetext = Path(filename).stem.replace('%20', ' ').split('-')[1]
@@ -74,8 +72,11 @@ def download_dats(folder_helper):
 
         print(f'Downloading {name} DAT files')
         with ThreadPoolExecutor(max_workers=10) as executor:
-            for href in links:
-                executor.submit(download_dat, href, name)
+            futures = [
+                executor.submit(download_dat, href, name) for href in links
+            ]
+            for future in futures:
+                future.result()
 
         path = os.path.join(folder_helper.dats, name)
         files = os.listdir(path)
