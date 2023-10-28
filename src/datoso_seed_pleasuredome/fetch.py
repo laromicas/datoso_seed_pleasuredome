@@ -16,14 +16,14 @@ SETS = {
     'MAME': {
         'url': 'https://pleasuredome.github.io/pleasuredome/mame/index.html'
     },
-    'Reference': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/mame-reference-sets/index.html'
-    },
+    # 'Reference': {
+    #     'url': 'https://pleasuredome.github.io/pleasuredome/mame-reference-sets/index.html'
+    # },
     'HBMAME': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/hbmame/index.html'
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html'
     },
     'FruitMachines': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/fruitmachines/index.html'
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html'
     },
 }
 
