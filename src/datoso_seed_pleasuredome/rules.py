@@ -1,4 +1,4 @@
-from datoso_seed_pleasuredome.dats import FruitMachinesDat, HomeBrewMameDat, MameDat
+from datoso_seed_pleasuredome.dats import FruitMachinesXMLDat, HomeBrewMameDat, MameDat
 
 rules = [
     {
@@ -29,7 +29,7 @@ rules = [
     },
     {
         'name': 'PleasureDome DATs',
-        '_class': FruitMachinesDat,
+        '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
         'rules': [
@@ -42,7 +42,7 @@ rules = [
     },
     {
         'name': 'PleasureDome DATs',
-        '_class': FruitMachinesDat,
+        '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
         'rules': [
@@ -55,7 +55,7 @@ rules = [
     },
     {
         'name': 'PleasureDome DATs',
-        '_class': FruitMachinesDat,
+        '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
         'rules': [

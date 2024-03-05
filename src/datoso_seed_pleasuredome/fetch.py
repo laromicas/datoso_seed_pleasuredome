@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import urllib.request
 import zipfile
+import logging
 from urllib.parse import urljoin
 import dateutil.parser
 from datoso.helpers import downloader
@@ -105,13 +106,19 @@ def download_dats(folder_helper):
                     or 'EXTRA' in file:
                     new_path = os.path.join(path, Path(file).stem)
                     os.makedirs(new_path, exist_ok=True)
-                    with zipfile.ZipFile(file, 'r') as zip_ref:
-                        zip_ref.extractall(new_path)
-                    os.remove(file)
+                    try:
+                        with zipfile.ZipFile(file, 'r') as zip_ref:
+                            zip_ref.extractall(new_path)
+                        os.remove(file)
+                    except zipfile.BadZipFile:
+                        logging.error(f'Error extracting {file}')
                 else:
-                    with zipfile.ZipFile(file, 'r') as zip_ref:
-                        zip_ref.extractall(path)
-                    os.remove(file)
+                    try:
+                        with zipfile.ZipFile(file, 'r') as zip_ref:
+                            zip_ref.extractall(path)
+                        os.remove(file)
+                    except zipfile.BadZipFile:
+                        logging.error(f'Error extracting {file}')
 
 
 def fetch():
