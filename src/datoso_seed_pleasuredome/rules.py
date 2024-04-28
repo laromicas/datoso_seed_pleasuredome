@@ -10,9 +10,9 @@ rules = [
             {
                 'key': 'name',
                 'operator': 'contains',
-                'value': 'HBMAME'
-            }
-        ]
+                'value': 'HBMAME',
+            },
+        ],
     },
     {
         'name': 'PleasureDome DATs',
@@ -23,9 +23,9 @@ rules = [
             {
                 'key': 'name',
                 'operator': 'contains',
-                'value': 'MAME'
-            }
-        ]
+                'value': 'MAME',
+            },
+        ],
     },
     {
         'name': 'PleasureDome DATs',
@@ -36,9 +36,9 @@ rules = [
             {
                 'key': 'name',
                 'operator': 'contains',
-                'value': 'Fruit Machine'
-            }
-        ]
+                'value': 'Fruit Machine',
+            },
+        ],
     },
     {
         'name': 'PleasureDome DATs',
@@ -49,9 +49,9 @@ rules = [
             {
                 'key': 'name',
                 'operator': 'contains',
-                'value': 'FruitMachine'
-            }
-        ]
+                'value': 'FruitMachine',
+            },
+        ],
     },
     {
         'name': 'PleasureDome DATs',
@@ -62,10 +62,10 @@ rules = [
             {
                 'key': 'name',
                 'operator': 'contains',
-                'value': 'SWP Machine'
-            }
-        ]
-    }
+                'value': 'SWP Machine',
+            },
+        ],
+    },
 ]
 
 def get_rules():

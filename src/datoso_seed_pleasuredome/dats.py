@@ -1,29 +1,27 @@
-"""
-    PleasureDome Dat class to parse different types of dat files.
-"""
-import os
-import re
+"""PleasureDome Dat class to parse different types of dat files."""
 import json
-from pathlib import Path
 import logging
-from datoso.helpers import FileHeaders
+import re
+from pathlib import Path
 
-from datoso.repositories.dat import XMLDatFile, ClrMameProDatFile, DirMultiDatFile
+from datoso.helpers import FileHeaders
+from datoso.repositories.dat import ClrMameProDatFile, DirMultiDatFile, XMLDatFile
+
 # pylint: disable=attribute-defined-outside-init,unsupported-membership-test
 
 
 def mame_dat_factory(file: str):
-    """ Dat factory. """
+    """Dat factory."""
     ext = Path(file).suffix
     if ext in ('.dat', '.xml'):
         return MameDat
-    if os.path.isdir(file):
+    if Path.is_dir(file):
         return MameDirDat
     return None
 
 
 def get_version(string: str):
-    """ Get the version from the dat file. """
+    """Get the version from the dat file."""
     search = re.findall(r'0\.[0-9]*[\.[0-9]*]?', string)
     if search:
         return search[-1]
@@ -31,21 +29,20 @@ def get_version(string: str):
 
 
 def remove_extra_spaces(string: str):
-    """ Remove extra spaces from the dat file. """
+    """Remove extra spaces from the dat file."""
     return re.sub(' +', ' ', string)
 
 
 class MameDirDat(DirMultiDatFile):
-    """ Mame Dir Dat class. """
+    """Mame Dir Dat class."""
 
     def initial_parse(self):
         # pylint: disable=R0801
-        """ Parse the dat file. """
-
+        """Parse the dat file."""
         self.company = None
         self.system = 'MAME'
         self.suffix = None
-        self.preffix = 'Arcade'
+        self.prefix = 'Arcade'
         self.version = get_version(self.file)
 
         if 'Update' in self.file:
@@ -53,20 +50,19 @@ class MameDirDat(DirMultiDatFile):
         else:
             self.name = remove_extra_spaces(self.name.replace(self.version, ''))
 
-        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
 class MameDat(XMLDatFile):
-    """ Mame Dat class. """
+    """Mame Dat class."""
 
     def initial_parse(self):
         # pylint: disable=R0801
-        """ Parse the dat file. """
-
+        """Parse the dat file."""
         self.company = None
         self.system = 'MAME'
         self.suffix = None
-        self.preffix = 'Arcade'
+        self.prefix = 'Arcade'
         self.version = get_version(self.file)
 
         if 'Update' in self.file:
@@ -76,20 +72,19 @@ class MameDat(XMLDatFile):
         if 'dir2dat' in self.file and 'dir2dat' not in self.name:
             self.name = f'{self.name} (dir2dat)'
 
-        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
 class HomeBrewMameDat(XMLDatFile):
-    """ HomeBrew Mame Dat class. """
+    """HomeBrew Mame Dat class."""
 
     def initial_parse(self):
         # pylint: disable=R0801
-        """ Parse the dat file. """
-
+        """Parse the dat file."""
         self.company = None
         self.system = 'HBMAME'
         self.suffix = None
-        self.preffix = 'Arcade'
+        self.prefix = 'Arcade'
         self.version = get_version(self.file)
 
         if 'Update' in self.file:
@@ -99,29 +94,30 @@ class HomeBrewMameDat(XMLDatFile):
         if 'dir2dat' in self.file and 'dir2dat' not in self.name:
             self.name = f'{self.name} (dir2dat)'
 
-        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
 def fruit_machine_factory(file: str):
-    """ Fruit Dat factory. """
+    """Fruit Dat factory."""
     # Read first 5 chars of file to determine type
-    with open(file, 'r', encoding='utf-8') as file:
+    with open(file, encoding='utf-8') as file:
         file_header = file.read(5)
     if file_header == FileHeaders.XML.value:
         return FruitMachinesXMLDat
     if file_header == FileHeaders.CLRMAMEPRO.value:
         return FruitMachinesClrMameDat
-    logging.error(f'Unknown Fruit Machine Dat file: {file}')
+    logging.error('Unknown Fruit Machine Dat file: %s', file)
     return None
 
 class FruitMachinesXMLDat(XMLDatFile):
-    """ Fruit Machines Dat class. """
+    """Fruit Machines Dat class."""
 
     def load_metadata_file(self):
-        """ Load the metadata file. """
-        basedir = Path(self.file).parents[0]
-        filename = os.path.join(basedir, 'metadata.txt')
-        if os.path.exists(filename):
+        """Load the metadata file."""
+        file  = Path(self.file)
+        filename = file.parent / 'metadata.txt'
+        metadata = {}
+        if filename.exists():
             with open(filename, encoding='utf-8') as file:
                 metadata = json.load(file)
         return metadata
@@ -129,7 +125,7 @@ class FruitMachinesXMLDat(XMLDatFile):
 
     def initial_parse(self):
         # pylint: disable=R0801
-        """ Parse the dat file. """
+        """Parse the dat file."""
         name = self.name
         extra_data = self.load_metadata_file()
 
@@ -138,28 +134,29 @@ class FruitMachinesXMLDat(XMLDatFile):
             self.suffix = 'Layouts'
 
         self.company = 'Fruit'
-        self.system = extra_data['folder']
+        self.system = extra_data.get('folder', name)
 
-        self.preffix = 'Arcade'
+        self.prefix = 'Arcade'
 
-        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
     def get_date(self):
-        """ Get the date from the dat file. """
+        """Get the date from the dat file."""
         if self.file and '(' in self.file:
             file = str(self.file)
-            self.date = file[file.find("(")+1:file.find(")")]
+            self.date = file[file.find('(')+1:file.find(')')]
         return self.date
 
 class FruitMachinesClrMameDat(ClrMameProDatFile):
-    """ Fruit Machines Dat class. """
+    """Fruit Machines Dat class."""
 
     def load_metadata_file(self):
-        """ Load the metadata file. """
-        basedir = Path(self.file).parents[0]
-        filename = os.path.join(basedir, 'metadata.txt')
-        if os.path.exists(filename):
+        """Load the metadata file."""
+        file = Path(self.file)
+        filename = file.parent / 'metadata.txt'
+        metadata = {}
+        if Path.exists(filename):
             with open(filename, encoding='utf-8') as file:
                 metadata = json.load(file)
         return metadata
@@ -167,7 +164,7 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
 
     def initial_parse(self):
         # pylint: disable=R0801
-        """ Parse the dat file. """
+        """Parse the dat file."""
         name = self.name
         extra_data = self.load_metadata_file()
 
@@ -176,16 +173,16 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
             self.suffix = 'Layouts'
 
         self.company = 'Fruit'
-        self.system = extra_data['folder']
+        self.system = extra_data.get('folder', name)
 
-        self.preffix = 'Arcade'
+        self.prefix = 'Arcade'
 
-        return [self.preffix, self.company, self.system, self.suffix, self.get_date()]
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
     def get_date(self):
-        """ Get the date from the dat file. """
+        """Get the date from the dat file."""
         if self.file and '(' in self.file:
             file = str(self.file)
-            self.date = file[file.find("(")+1:file.find(")")]
+            self.date = file[file.find('(')+1:file.find(')')]
         return self.date
