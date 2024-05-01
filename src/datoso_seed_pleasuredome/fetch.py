@@ -52,7 +52,10 @@ def download_dats(folder_helper):
     def get_dat_links(name, mame_url):
         # get mame dats
         print(f'Fetching {name} DAT files')
-        red = urllib.request.urlopen(mame_url)
+        if not mame_url.startswith(('http', 'https')):
+            msg = 'Invalid URL'
+            raise ValueError(msg)
+        red = urllib.request.urlopen(mame_url) # noqa: S310
         pleasurehtml = red.read()
 
         parser = MyHTMLParser()
