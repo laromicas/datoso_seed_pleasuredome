@@ -1,4 +1,4 @@
-from datoso_seed_pleasuredome.dats import HomeBrewMameDat, fruit_machine_factory, mame_dat_factory
+from datoso_seed_pleasuredome.dats import HomeBrewMameDat, RaineDat, KawaksDat, fruit_machine_factory, mame_dat_factory
 
 # ruff: noqa: ERA001
 
@@ -51,6 +51,38 @@ actions = {
             'action': 'SaveToDatabase',
         },
     ],
+    '{dat_origin}/Raine': [
+        {
+            'action': 'LoadDatFile',
+            '_class': RaineDat,
+        },
+        {
+            'action': 'DeleteOld',
+        },
+        {
+            'action': 'Copy',
+            'folder': '{dat_destination}',
+        },
+        {
+            'action': 'SaveToDatabase',
+        },
+    ],
+    '{dat_origin}/Kawaks': [
+        {
+            'action': 'LoadDatFile',
+            '_class': KawaksDat,
+        },
+        {
+            'action': 'DeleteOld',
+        },
+        {
+            'action': 'Copy',
+            'folder': '{dat_destination}',
+        },
+        {
+            'action': 'SaveToDatabase',
+        },
+    ],
     # '{dat_origin}/Reference': [
     #     {
     #         'action': 'LoadDatFile',
@@ -66,7 +98,7 @@ actions = {
     #     {
     #         'action': 'SaveToDatabase'
     #     }
-    # ]
+    # ],
 }
 
 def get_actions():

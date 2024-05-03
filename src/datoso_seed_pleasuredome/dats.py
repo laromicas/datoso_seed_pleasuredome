@@ -77,28 +77,32 @@ class MameDat(XMLDatFile):
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
-class HomeBrewMameDat(XMLDatFile):
+class HomeBrewMameDat(MameDat):
     """HomeBrew Mame Dat class."""
 
     def initial_parse(self):
         # pylint: disable=R0801
         """Parse the dat file."""
+        super().initial_parse()
         self.company = 'HBMAME'
-        self.system = self.name
-        self.suffix = None
-        self.prefix = self.system_type = 'Arcade'
-        file_name = str(self.file)
-        self.version = self.header.get('version', get_version(file_name))
 
-        if 'Update' in file_name:
-            self.suffix = 'Update'
-        # else:
-        #     self.name = remove_extra_spaces(self.name.replace(self.version, ''))
-        if 'dir2dat' in file_name and 'dir2dat' not in self.name:
-            self.name = f'{self.name} (dir2dat)'
+class RaineDat(MameDat):
+    """HomeBrew Mame Dat class."""
 
-        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
+    def initial_parse(self):
+        # pylint: disable=R0801
+        """Parse the dat file."""
+        super().initial_parse()
+        self.company = 'Raine'
 
+class KawaksDat(MameDat):
+    """HomeBrew Mame Dat class."""
+
+    def initial_parse(self):
+        # pylint: disable=R0801
+        """Parse the dat file."""
+        super().initial_parse()
+        self.company = 'Kawaks'
 
 def fruit_machine_factory(file: str):
     """Fruit Dat factory."""

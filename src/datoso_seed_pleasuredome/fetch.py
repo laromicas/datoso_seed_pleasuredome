@@ -4,34 +4,25 @@ import os
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import ClassVar
 from urllib.parse import urljoin
 
 import dateutil.parser
 
+from datoso.configuration import config
 from datoso.configuration.folder_helper import Folders
+from datoso.helpers import FileUtils
 from datoso.helpers.download import downloader
 from datoso_seed_pleasuredome import __prefix__
 
 # ruff: noqa: ERA001
 
-MAME_URL = 'https://pleasuredome.github.io/pleasuredome/mame/index.html'
-SETS = {
-    'MAME': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/mame/index.html',
-    },
-    # 'Reference': {
-    #     'url': 'https://pleasuredome.github.io/pleasuredome/mame-reference-sets/index.html'
-    # },
-    'HBMAME': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html',
-    },
-    'FruitMachines': {
-        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html',
-    },
-}
+# TODO(laromicas): Auto add sets from the website https://pleasuredome.github.io/pleasuredome/nonmame/index.html
 
+MAME_URL = 'https://pleasuredome.github.io/pleasuredome/mame/index.html'
 
 class MyHTMLParser(HTMLParser):
     dats: list = None
@@ -48,8 +39,70 @@ class MyHTMLParser(HTMLParser):
                     self.dats.append(urljoin(self.rootpath, href).replace(' ', '%20'))
 
 
-def download_dats(folder_helper):
-    def get_dat_links(name, mame_url):
+class PDSET(Enum):
+    MAME: ClassVar = {
+            'url': 'https://pleasuredome.github.io/pleasuredome/mame/index.html',
+            'configVar': 'mame',
+            'actions': [
+                'extract_mame_dats',
+            ],
+        }
+    Reference: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/mame/mame-reference-sets/index.html',
+        'configVar': 'mame_reference',
+    }
+    HBMAME: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html',
+        'configVar': 'hbmame',
+        'actions': [
+            'extract_fruit_hbmame_dats',
+        ],
+    }
+    FruitMachines: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html',
+        'configVar': 'fruitmachines',
+        'actions': [
+            'write_metadata_fruit',
+            'extract_fruit_hbmame_dats',
+        ],
+    }
+    Demul: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/demul/index.html',
+        'configVar': 'demul',
+    }
+    FinalBurnNeo: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/fbneo/index.html',
+        'configVar': 'fbneo',
+    }
+    Kawaks: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/kawaks/index.html',
+        'configVar': 'kawaks',
+        'actions': [
+            'extract_fruit_hbmame_dats',
+        ],
+    }
+    Pinball: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/pinball/index.html',
+        'configVar': 'pinball',
+    }
+    PinMAME: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/pinmame/index.html',
+        'configVar': 'pinmame',
+    }
+    Raine: ClassVar = {
+        'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/raine/index.html',
+        'configVar': 'raine',
+        'actions': [
+            'extract_fruit_hbmame_dats',
+        ],
+    }
+
+class PleasureDomeHelper:
+
+    def __init__(self, folder_helper):
+        self.folder_helper = folder_helper
+
+    def get_dat_links(self, name, mame_url):
         # get mame dats
         print(f'Fetching {name} DAT files')
         if not mame_url.startswith(('http', 'https')):
@@ -61,22 +114,23 @@ def download_dats(folder_helper):
         parser = MyHTMLParser()
         parser.dats = []
         parser.rootpath = mame_url
-        parser.folder_helper = folder_helper
+        parser.folder_helper = self.folder_helper
         parser.feed(str(pleasurehtml))
         return parser.dats
 
-    def download_dat(href, folder):
+    def download_dat(self, href, folder):
         filename = Path(href).name.replace('%20', ' ')
-        downloader(url=href, destination=folder_helper.dats / folder / filename, reporthook=None)
+        downloader(url=href, destination=self.folder_helper.dats / folder / filename, reporthook=None)
 
-    def extract_date(filename):
+    def extract_date(self, filename):
         datetext = Path(filename).stem.replace('%20', ' ').split('-')[1]
         return dateutil.parser.parse(datetext)
 
-    def write_metadata_fruit(path, files):
+    def write_metadata_fruit(self, name, files):
+        path = self.folder_helper.dats / name
         for file in files:
             if 'FruitMachines' in file and file.endswith('.zip'):
-                date = extract_date(file)
+                date = self.extract_date(file)
             with open(path / 'metadata.txt', 'w') as f:
                 metadata = {
                     'name': 'FruitMachines',
@@ -86,14 +140,21 @@ def download_dats(folder_helper):
                 }
                 f.write(json.dumps(metadata, indent=4))
 
-    def extract_fruit_hbmame_dats(path, files):
+    def backup_file(self, path, file):
+        path.mkdir(parents=True, exist_ok=True)
+        FileUtils.move(file, path)
+
+    def extract_fruit_hbmame_dats(self, name, files):
+        path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
             with zipfile.ZipFile(filepath, 'r') as zip_ref:
                 zip_ref.extractall(path)
-            filepath.unlink()
+            # filepath.unlink()
+            self.backup_file(self.folder_helper.backup /name, filepath)
 
-    def extract_mame_dats(path, files):
+    def extract_mame_dats(self, name, files):
+        path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
             filename = str(filepath)
@@ -104,44 +165,46 @@ def download_dats(folder_helper):
                 try:
                     with zipfile.ZipFile(filepath, 'r') as zip_ref:
                         zip_ref.extractall(new_path)
-                    filepath.unlink()
+                    # filepath.unlink()
+                    self.backup_file(self.folder_helper.backup /name, filepath)
                 except zipfile.BadZipFile:
                     logging.exception('Error extracting %s', filename)
             else:
                 try:
                     with zipfile.ZipFile(filepath, 'r') as zip_ref:
                         zip_ref.extractall(path)
-                    filepath.unlink()
+                    # filepath.unlink()
+                    self.backup_file(self.folder_helper.backup /name, filepath)
                 except zipfile.BadZipFile:
                     logging.exception('Error extracting %s', filename)
 
-    for name, sets in SETS.items():
-        if name == 'Reference': # TODO(laromicas): allow reference sets by configuration
-            continue
-        url = sets['url']
-        links = get_dat_links(name, url)
+    def download_dats(self):
+        sets_to_download = config.get('PLEASUREDOME', 'download', fallback='mame,hbmame,fruitmachines').split(',')
+        for pdset in PDSET:
+            if pdset.name.lower() not in sets_to_download:
+                continue
+            name = pdset.name
+            url = pdset.value['url']
+            links = self.get_dat_links(name, url)
 
-        print(f'Downloading {name} DAT files')
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(download_dat, href, name) for href in links
-            ]
-            for future in futures:
-                future.result()
+            print(f'Downloading {name} DAT files')
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                futures = [
+                    executor.submit(self.download_dat, href, name) for href in links
+                ]
+                for future in futures:
+                    future.result()
 
-        path = folder_helper.dats / name
-        files = os.listdir(path)
-        if name in ('FruitMachines'):
-            write_metadata_fruit(path, files)
-        if name in ('FruitMachines', 'HBMAME'):
-            extract_fruit_hbmame_dats(path, files)
-        if name in ('MAME'):
-            extract_mame_dats(path, files)
-
+            path = self.folder_helper.dats / name
+            files = os.listdir(path)
+            for action in pdset.value.get('actions', []):
+                func = getattr(self, action)
+                func(name, files)
 
 
 def fetch():
-    folder_helper = Folders(seed=__prefix__, extras=SETS.keys())
+    folder_helper = Folders(seed=__prefix__, extras=[x.name for x in PDSET])
     folder_helper.clean_dats()
     folder_helper.create_all()
-    download_dats(folder_helper)
+    pleasure_dome = PleasureDomeHelper(folder_helper)
+    pleasure_dome.download_dats()
