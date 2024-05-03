@@ -1,4 +1,4 @@
-from datoso_seed_pleasuredome.dats import HomeBrewMameDat, RaineDat, KawaksDat, fruit_machine_factory, mame_dat_factory
+from datoso_seed_pleasuredome.dats import HomeBrewMameDat, KawaksDat, RaineDat, fruit_machine_factory, mame_dat_factory
 
 # ruff: noqa: ERA001
 
