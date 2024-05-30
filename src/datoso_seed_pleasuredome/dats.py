@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from datoso.helpers import FileHeaders
-from datoso.repositories.dat import ClrMameProDatFile, DirMultiDatFile, XMLDatFile
+from datoso.repositories.dat_file import ClrMameProDatFile, DirMultiDatFile, XMLDatFile
 
 # pylint: disable=attribute-defined-outside-init,unsupported-membership-test
 
