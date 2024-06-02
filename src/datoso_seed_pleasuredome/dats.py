@@ -35,6 +35,7 @@ def remove_extra_spaces(string: str):
 
 class MameDirDat(DirMultiDatFile):
     """Mame Dir Dat class."""
+    seed: str = 'pleasuredome'
 
     def initial_parse(self):
         # pylint: disable=R0801
@@ -56,6 +57,7 @@ class MameDirDat(DirMultiDatFile):
 
 class MameDat(XMLDatFile):
     """Mame Dat class."""
+    seed: str = 'pleasuredome'
 
     def initial_parse(self):
         # pylint: disable=R0801
@@ -86,6 +88,7 @@ class HomeBrewMameDat(MameDat):
         super().initial_parse()
         self.company = 'HBMAME'
 
+
 class RaineDat(MameDat):
     """HomeBrew Mame Dat class."""
 
@@ -95,6 +98,7 @@ class RaineDat(MameDat):
         super().initial_parse()
         self.company = 'Raine'
 
+
 class KawaksDat(MameDat):
     """HomeBrew Mame Dat class."""
 
@@ -103,6 +107,7 @@ class KawaksDat(MameDat):
         """Parse the dat file."""
         super().initial_parse()
         self.company = 'Kawaks'
+
 
 def fruit_machine_factory(file: str):
     """Fruit Dat factory."""
@@ -115,6 +120,7 @@ def fruit_machine_factory(file: str):
         return FruitMachinesClrMameDat
     logging.error('Unknown Fruit Machine Dat file: %s', file)
     return None
+
 
 class FruitMachinesXMLDat(XMLDatFile):
     """Fruit Machines Dat class."""
@@ -129,7 +135,6 @@ class FruitMachinesXMLDat(XMLDatFile):
                 metadata = json.load(file)
         return metadata
 
-
     def initial_parse(self):
         # pylint: disable=R0801
         """Parse the dat file."""
@@ -147,7 +152,6 @@ class FruitMachinesXMLDat(XMLDatFile):
 
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
-
     def get_date(self):
         """Get the date from the dat file."""
         if self.file and '(' in self.file:
@@ -155,8 +159,10 @@ class FruitMachinesXMLDat(XMLDatFile):
             self.date = file[file.find('(')+1:file.find(')')]
         return self.date
 
+
 class FruitMachinesClrMameDat(ClrMameProDatFile):
     """Fruit Machines Dat class."""
+    seed: str = 'pleasuredome'
 
     def load_metadata_file(self):
         """Load the metadata file."""
@@ -168,7 +174,6 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
                 metadata = json.load(file)
         return metadata
 
-
     def initial_parse(self):
         # pylint: disable=R0801
         """Parse the dat file."""
@@ -185,7 +190,6 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
         self.prefix = 'Arcade'
 
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
-
 
     def get_date(self):
         """Get the date from the dat file."""
