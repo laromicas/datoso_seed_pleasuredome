@@ -5,12 +5,12 @@ import re
 from pathlib import Path
 
 from datoso.helpers import FileHeaders
-from datoso.repositories.dat_file import ClrMameProDatFile, DirMultiDatFile, XMLDatFile
+from datoso.repositories.dat_file import ClrMameProDatFile, DatFile, DirMultiDatFile, XMLDatFile
 
 # pylint: disable=attribute-defined-outside-init,unsupported-membership-test
 
 
-def mame_dat_factory(file: str):
+def mame_dat_factory(file: str) -> DatFile | None:
     """Dat factory."""
     ext = Path(file).suffix
     if ext in ('.dat', '.xml'):
@@ -20,7 +20,7 @@ def mame_dat_factory(file: str):
     return None
 
 
-def get_version(string: str):
+def get_version(string: str) -> str | None:
     """Get the version from the dat file."""
     search = re.findall(r'0\.[0-9]*[\.[0-9]*]?', str(string))
     if search:
@@ -28,16 +28,17 @@ def get_version(string: str):
     return None
 
 
-def remove_extra_spaces(string: str):
+def remove_extra_spaces(string: str) -> str:
     """Remove extra spaces from the dat file."""
     return re.sub(' +', ' ', string)
 
 
 class MameDirDat(DirMultiDatFile):
     """Mame Dir Dat class."""
+
     seed: str = 'pleasuredome'
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         self.company = None
@@ -57,9 +58,10 @@ class MameDirDat(DirMultiDatFile):
 
 class MameDat(XMLDatFile):
     """Mame Dat class."""
+
     seed: str = 'pleasuredome'
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         self.company = 'MAME'
@@ -82,7 +84,7 @@ class MameDat(XMLDatFile):
 class HomeBrewMameDat(MameDat):
     """HomeBrew Mame Dat class."""
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         super().initial_parse()
@@ -92,7 +94,7 @@ class HomeBrewMameDat(MameDat):
 class RaineDat(MameDat):
     """HomeBrew Mame Dat class."""
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         super().initial_parse()
@@ -102,14 +104,14 @@ class RaineDat(MameDat):
 class KawaksDat(MameDat):
     """HomeBrew Mame Dat class."""
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         super().initial_parse()
         self.company = 'Kawaks'
 
 
-def fruit_machine_factory(file: str):
+def fruit_machine_factory(file: str) -> DatFile | None:
     """Fruit Dat factory."""
     # Read first 5 chars of file to determine type
     with open(file, encoding='utf-8') as file:
@@ -125,7 +127,7 @@ def fruit_machine_factory(file: str):
 class FruitMachinesXMLDat(XMLDatFile):
     """Fruit Machines Dat class."""
 
-    def load_metadata_file(self):
+    def load_metadata_file(self) -> dict:
         """Load the metadata file."""
         file  = Path(self.file)
         metadata_file = file.parent / 'metadata.txt'
@@ -135,7 +137,7 @@ class FruitMachinesXMLDat(XMLDatFile):
                 metadata = json.load(file)
         return metadata
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         name = self.name
@@ -152,7 +154,7 @@ class FruitMachinesXMLDat(XMLDatFile):
 
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
-    def get_date(self):
+    def get_date(self) -> str:
         """Get the date from the dat file."""
         if self.file and '(' in self.file:
             file = str(self.file)
@@ -162,9 +164,10 @@ class FruitMachinesXMLDat(XMLDatFile):
 
 class FruitMachinesClrMameDat(ClrMameProDatFile):
     """Fruit Machines Dat class."""
+
     seed: str = 'pleasuredome'
 
-    def load_metadata_file(self):
+    def load_metadata_file(self) -> dict:
         """Load the metadata file."""
         file = Path(self.file)
         file_name = file.parent / 'metadata.txt'
@@ -174,7 +177,7 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
                 metadata = json.load(file)
         return metadata
 
-    def initial_parse(self):
+    def initial_parse(self) -> list:
         # pylint: disable=R0801
         """Parse the dat file."""
         name = self.name
@@ -191,7 +194,7 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
 
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
-    def get_date(self):
+    def get_date(self) -> str:
         """Get the date from the dat file."""
         if self.file and '(' in self.file:
             file = str(self.file)

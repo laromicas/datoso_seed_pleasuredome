@@ -1,3 +1,4 @@
+"""Actions for the pleasuredome seed."""
 from datoso_seed_pleasuredome.dats import HomeBrewMameDat, KawaksDat, RaineDat, fruit_machine_factory, mame_dat_factory
 
 # ruff: noqa: ERA001
@@ -106,5 +107,6 @@ actions = {
     # ],
 }
 
-def get_actions():
+def get_actions() -> dict:
+    """Get the actions dictionary."""
     return actions

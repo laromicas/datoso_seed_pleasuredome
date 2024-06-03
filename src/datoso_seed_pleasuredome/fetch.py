@@ -1,9 +1,11 @@
+"""Fetch and download DAT files."""
 import json
 import logging
 import os
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from enum import Enum
 from html.parser import HTMLParser
 from pathlib import Path
@@ -25,10 +27,13 @@ from datoso_seed_pleasuredome import __prefix__
 MAME_URL = 'https://pleasuredome.github.io/pleasuredome/mame/index.html'
 
 class MyHTMLParser(HTMLParser):
+    """A custom HTML parser for parsing Pleasuredome HTML."""
+
     dats: list = None
     rootpath = None
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        """Handle the start tag of an HTML element, capture the zip hrefs."""
         if self.dats is None:
             self.dats = []
         if tag == 'a':
@@ -40,6 +45,8 @@ class MyHTMLParser(HTMLParser):
 
 
 class PDSET(Enum):
+    """Pleasuredome DAT Enum."""
+
     MAME: ClassVar = {
             'url': 'https://pleasuredome.github.io/pleasuredome/mame/index.html',
             'configVar': 'mame',
@@ -98,12 +105,14 @@ class PDSET(Enum):
     }
 
 class PleasureDomeHelper:
+    """Helper class for Pleasuredome."""
 
-    def __init__(self, folder_helper):
+    def __init__(self, folder_helper: Folders) -> None:
+        """Initialize PleasureDomeHelper."""
         self.folder_helper = folder_helper
 
-    def get_dat_links(self, name, mame_url):
-        # get mame dats
+    def get_dat_links(self, name: str, mame_url: str) -> list:
+        """Get DAT links from Pleasuredome."""
         print(f'Fetching {name} DAT files')
         if not mame_url.startswith(('http', 'https')):
             msg = 'Invalid URL'
@@ -118,15 +127,18 @@ class PleasureDomeHelper:
         parser.feed(str(pleasurehtml))
         return parser.dats
 
-    def download_dat(self, href, folder):
+    def download_dat(self, href: str, folder: str) -> None:
+        """Download a DAT file."""
         filename = Path(href).name.replace('%20', ' ')
         downloader(url=href, destination=self.folder_helper.dats / folder / filename, reporthook=None)
 
-    def extract_date(self, filename):
+    def extract_date(self, filename: str) -> datetime:
+        """Extract date from filename."""
         datetext = Path(filename).stem.replace('%20', ' ').split('-')[1]
         return dateutil.parser.parse(datetext)
 
-    def write_metadata_fruit(self, name, files):
+    def write_metadata_fruit(self, name: str, files: list) -> None:
+        """Write metadata for FruitMachines."""
         path = self.folder_helper.dats / name
         for file in files:
             if 'FruitMachines' in file and file.endswith('.zip'):
@@ -140,11 +152,13 @@ class PleasureDomeHelper:
                 }
                 f.write(json.dumps(metadata, indent=4))
 
-    def backup_file(self, path, file):
+    def backup_file(self, path: str, file: str) -> None:
+        """Backup a file."""
         path.mkdir(parents=True, exist_ok=True)
         FileUtils.move(file, path)
 
-    def extract_fruit_hbmame_dats(self, name, files):
+    def extract_fruit_hbmame_dats(self, name: str, files: str) -> None:
+        """Extract FruitMachines and HBMAME DATs."""
         path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
@@ -153,7 +167,8 @@ class PleasureDomeHelper:
             # filepath.unlink()
             self.backup_file(self.folder_helper.backup /name, filepath)
 
-    def extract_mame_dats(self, name, files):
+    def extract_mame_dats(self, name: str, files: list) -> None:
+        """Extract MAME DATs."""
         path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
@@ -178,7 +193,8 @@ class PleasureDomeHelper:
                 except zipfile.BadZipFile:
                     logging.exception('Error extracting %s', filename)
 
-    def download_dats(self):
+    def download_dats(self) -> None:
+        """Download DAT files."""
         sets_to_download = config.get('PLEASUREDOME', 'download', fallback='mame,hbmame,fruitmachines').split(',')
         for pdset in PDSET:
             if pdset.name.lower() not in sets_to_download:
@@ -202,7 +218,8 @@ class PleasureDomeHelper:
                 func(name, files)
 
 
-def fetch():
+def fetch() -> None:
+    """Fetch and download DAT files."""
     folder_helper = Folders(seed=__prefix__, extras=[x.name for x in PDSET])
     folder_helper.clean_dats()
     folder_helper.create_all()

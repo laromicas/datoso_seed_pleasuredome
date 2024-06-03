@@ -1,3 +1,4 @@
+"""Rules for the PleasureDome seed."""
 from datoso_seed_pleasuredome.dats import FruitMachinesXMLDat, HomeBrewMameDat, MameDat
 
 rules = [
@@ -68,5 +69,6 @@ rules = [
     },
 ]
 
-def get_rules():
+def get_rules() -> list:
+    """Get the rules."""
     return rules
