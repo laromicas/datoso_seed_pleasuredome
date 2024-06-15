@@ -143,14 +143,14 @@ class PleasureDomeHelper:
         for file in files:
             if 'FruitMachines' in file and file.endswith('.zip'):
                 date = self.extract_date(file)
-            with open(path / 'metadata.txt', 'w') as f:
+            with open(path / 'metadata.txt', 'w', encoding='utf-8') as f:
                 metadata = {
                     'name': 'FruitMachines',
                     'date': date.strftime('%Y-%m-%d'),
                     'zipfile': file,
                     'folder': Path(file).stem,
                 }
-                f.write(json.dumps(metadata, indent=4))
+                json.dump(metadata, f, indent=4)
 
     def backup_file(self, path: str, file: str) -> None:
         """Backup a file."""
