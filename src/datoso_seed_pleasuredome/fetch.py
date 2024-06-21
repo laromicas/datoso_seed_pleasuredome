@@ -62,7 +62,7 @@ class PDSET(Enum):
         'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html',
         'configVar': 'hbmame',
         'actions': [
-            'extract_fruit_hbmame_dats',
+            'extract_mame_dats',
         ],
     }
     FruitMachines: ClassVar = {
@@ -70,7 +70,7 @@ class PDSET(Enum):
         'configVar': 'fruitmachines',
         'actions': [
             'write_metadata_fruit',
-            'extract_fruit_hbmame_dats',
+            'extract_fruit_dats',
         ],
     }
     Demul: ClassVar = {
@@ -85,7 +85,7 @@ class PDSET(Enum):
         'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/kawaks/index.html',
         'configVar': 'kawaks',
         'actions': [
-            'extract_fruit_hbmame_dats',
+            'extract_fruit_dats',
         ],
     }
     Pinball: ClassVar = {
@@ -100,7 +100,7 @@ class PDSET(Enum):
         'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/raine/index.html',
         'configVar': 'raine',
         'actions': [
-            'extract_fruit_hbmame_dats',
+            'extract_fruit_dats',
         ],
     }
 
@@ -157,8 +157,8 @@ class PleasureDomeHelper:
         path.mkdir(parents=True, exist_ok=True)
         FileUtils.move(file, path)
 
-    def extract_fruit_hbmame_dats(self, name: str, files: str) -> None:
-        """Extract FruitMachines and HBMAME DATs."""
+    def extract_fruit_dats(self, name: str, files: str) -> None:
+        """Extract FruitMachines DATs."""
         path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file

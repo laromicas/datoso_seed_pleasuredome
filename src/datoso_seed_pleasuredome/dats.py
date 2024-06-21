@@ -19,6 +19,15 @@ def mame_dat_factory(file: str) -> DatFile | None:
         return MameDirDat
     return None
 
+def hbmame_dat_factory(file: str) -> DatFile | None:
+    """Dat factory."""
+    ext = Path(file).suffix
+    if ext in ('.dat', '.xml'):
+        return HomeBrewMameDat
+    if Path.is_dir(file):
+        return HomeBrewMameDirDat
+    return None
+
 
 def get_version(string: str) -> str | None:
     """Get the version from the dat file."""
@@ -81,6 +90,17 @@ class MameDat(XMLDatFile):
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 
+class HomeBrewMameDirDat(MameDirDat):
+    """HomeBrew Mame Dir Dat class."""
+
+    def initial_parse(self) -> list:
+        # pylint: disable=R0801
+        """Parse the dat file."""
+        super().initial_parse()
+        self.company = ''
+        self.system = 'HBMAME'
+
+
 class HomeBrewMameDat(MameDat):
     """HomeBrew Mame Dat class."""
 
@@ -89,6 +109,7 @@ class HomeBrewMameDat(MameDat):
         """Parse the dat file."""
         super().initial_parse()
         self.company = 'HBMAME'
+
 
 
 class RaineDat(MameDat):

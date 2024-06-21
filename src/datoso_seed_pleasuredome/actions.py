@@ -1,5 +1,11 @@
 """Actions for the pleasuredome seed."""
-from datoso_seed_pleasuredome.dats import HomeBrewMameDat, KawaksDat, RaineDat, fruit_machine_factory, mame_dat_factory
+from datoso_seed_pleasuredome.dats import (
+        KawaksDat,
+        RaineDat,
+        fruit_machine_factory,
+        hbmame_dat_factory,
+        mame_dat_factory,
+    )
 
 # ruff: noqa: ERA001
 
@@ -24,7 +30,7 @@ actions = {
     '{dat_origin}/HBMAME': [
         {
             'action': 'LoadDatFile',
-            '_class': HomeBrewMameDat,
+            '_factory': hbmame_dat_factory,
         },
         {
             'action': 'DeleteOld',
