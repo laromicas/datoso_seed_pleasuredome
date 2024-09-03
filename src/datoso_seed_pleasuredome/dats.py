@@ -132,16 +132,16 @@ class KawaksDat(MameDat):
         self.company = 'Kawaks'
 
 
-def fruit_machine_factory(file: str) -> DatFile | None:
+def fruit_machine_factory(file_name: str) -> DatFile | None:
     """Fruit Dat factory."""
     # Read first 5 chars of file to determine type
-    with open(file, encoding='utf-8') as file:
+    with open(file_name, encoding='utf-8') as file:
         file_header = file.read(5)
     if file_header == FileHeaders.XML.value:
         return FruitMachinesXMLDat
     if file_header == FileHeaders.CLRMAMEPRO.value:
         return FruitMachinesClrMameDat
-    logging.error('Unknown Fruit Machine Dat file: %s', file)
+    logging.error('Unknown Fruit Machine Dat file: %s', file_name)
     return None
 
 
