@@ -4,7 +4,7 @@ import logging
 import re
 from pathlib import Path
 
-from datoso.helpers import FileHeaders
+from datoso.configuration import config
 from datoso.repositories.dat_file import ClrMameProDatFile, DatFile, DirMultiDatFile, XMLDatFile
 
 # pylint: disable=attribute-defined-outside-init,unsupported-membership-test
@@ -82,7 +82,13 @@ class MameDat(XMLDatFile):
         if 'Update' in file_name:
             self.suffix = 'Update'
         else:
-            self.name = remove_extra_spaces(self.name.replace(self.version, ''))
+            try:
+                self.name = remove_extra_spaces(self.name.replace(self.version, ''))
+            except TypeError:
+                print(self.name)
+                print(self.version)
+                print(self.__dict__['header'])
+                raise
         if 'dir2dat' in file_name and 'dir2dat' not in self.name:
             self.name = f'{self.name} (dir2dat)'
         self.system = self.name
@@ -121,6 +127,35 @@ class RaineDat(MameDat):
         super().initial_parse()
         self.company = 'Raine'
 
+class PinballDat(XMLDatFile):
+    """HomeBrew Mame Dat class."""
+
+    allowed_systems = ['Future Pinball', 'Visual Pinball']
+
+    def get_system(self) -> str:
+        """Get the system from the dat file."""
+        for system in self.allowed_systems:
+            if system in self.name:
+                return system
+        return 'Pinball'
+
+    def initial_parse(self) -> list:
+        # pylint: disable=R0801
+        """Parse the dat file."""
+        # Remove date from name
+        self.name = self.name.split('(')[0].strip()
+        self.company = None
+        self.system = self.get_system()
+        self.suffix = self.name
+
+        self.overrides()
+
+        if self.modifier or self.system_type:
+            self.prefix = config.get('PREFIXES', self.modifier or self.system_type, fallback='Pinball')
+        else:
+            self.prefix = None
+
+        return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
 class KawaksDat(MameDat):
     """HomeBrew Mame Dat class."""
@@ -134,12 +169,10 @@ class KawaksDat(MameDat):
 
 def fruit_machine_factory(file_name: str) -> DatFile | None:
     """Fruit Dat factory."""
-    # Read first 5 chars of file to determine type
-    with open(file_name, encoding='utf-8') as file:
-        file_header = file.read(5)
-    if file_header == FileHeaders.XML.value:
+    dat_class = DatFile.class_from_file(file_name)
+    if dat_class == XMLDatFile:
         return FruitMachinesXMLDat
-    if file_header == FileHeaders.CLRMAMEPRO.value:
+    if dat_class == ClrMameProDatFile:
         return FruitMachinesClrMameDat
     logging.error('Unknown Fruit Machine Dat file: %s', file_name)
     return None
@@ -165,8 +198,7 @@ class FruitMachinesXMLDat(XMLDatFile):
         extra_data = self.load_metadata_file()
 
         name = name.split('(')[0].strip()
-        if 'Layouts' in self.file:
-            self.suffix = 'Layouts'
+        self.suffix = get_suffix(self.file)
 
         self.company = 'Fruit'
         self.system = extra_data.get('folder', name)
@@ -177,7 +209,7 @@ class FruitMachinesXMLDat(XMLDatFile):
 
     def get_date(self) -> str:
         """Get the date from the dat file."""
-        if self.file and '(' in self.file:
+        if self.file and '(' in str(self.file):
             file = str(self.file)
             self.date = file[file.find('(')+1:file.find(')')]
         return self.date
@@ -203,21 +235,39 @@ class FruitMachinesClrMameDat(ClrMameProDatFile):
         """Parse the dat file."""
         name = self.name
         extra_data = self.load_metadata_file()
+        # print(extra_data)
+        # exit()
 
         name = name.split('(')[0].strip()
-        if 'Layouts' in self.file:
-            self.suffix = 'Layouts'
+        self.suffix = get_suffix(self.file)
 
         self.company = 'Fruit'
         self.system = extra_data.get('folder', name)
 
         self.prefix = 'Arcade'
-
         return [self.prefix, self.company, self.system, self.suffix, self.get_date()]
 
     def get_date(self) -> str:
         """Get the date from the dat file."""
-        if self.file and '(' in self.file:
+        if self.file and '(' in str(self.file):
             file = str(self.file)
             self.date = file[file.find('(')+1:file.find(')')]
         return self.date
+
+def get_suffix(file_name: str) -> str:
+    """Get the suffix from the dat file."""
+    if 'Layouts' in str(file_name):
+        return 'Layouts'
+    elif 'MPU5 Hexfiles' in str(file_name):
+        return 'MPU5 Hexfiles'
+    elif 'Snapshots' in str(file_name):
+        return 'Snapshots'
+    elif 'Rollback' in str(file_name):
+        if '2009' in str(file_name):
+            return 'Rollback/2009'
+        if '2018' in str(file_name):
+            return 'Rollback/2018'
+        return 'Rollback'
+    elif 'SWP Machine Roms' in str(file_name):
+        return 'SWP Machine Roms'
+    return 'Roms'

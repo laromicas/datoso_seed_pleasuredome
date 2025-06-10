@@ -16,8 +16,8 @@ import dateutil.parser
 
 from datoso.configuration import config
 from datoso.configuration.folder_helper import Folders
-from datoso.helpers import FileUtils
 from datoso.helpers.download import downloader
+from datoso.helpers.file_utils import move_path
 from datoso_seed_pleasuredome import __prefix__
 
 # ruff: noqa: ERA001
@@ -91,6 +91,9 @@ class PDSET(Enum):
     Pinball: ClassVar = {
         'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/pinball/index.html',
         'configVar': 'pinball',
+        'actions': [
+            'extract_mame_dats',
+        ],
     }
     PinMAME: ClassVar = {
         'url': 'https://pleasuredome.github.io/pleasuredome/nonmame/pinmame/index.html',
@@ -148,20 +151,22 @@ class PleasureDomeHelper:
                     'name': 'FruitMachines',
                     'date': date.strftime('%Y-%m-%d'),
                     'zipfile': file,
-                    'folder': Path(file).stem,
+                    # 'folder': Path(file).stem,
+                    'folder': 'FruitMachines',
                 }
                 json.dump(metadata, f, indent=4)
 
     def backup_file(self, path: str, file: str) -> None:
         """Backup a file."""
         path.mkdir(parents=True, exist_ok=True)
-        FileUtils.move(file, path)
+        move_path(file, path)
 
     def extract_fruit_dats(self, name: str, files: str) -> None:
         """Extract FruitMachines DATs."""
         path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
+            filename = str(filepath)
             with zipfile.ZipFile(filepath, 'r') as zip_ref:
                 zip_ref.extractall(path)
             # filepath.unlink()

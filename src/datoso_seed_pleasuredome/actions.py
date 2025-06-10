@@ -1,11 +1,12 @@
 """Actions for the pleasuredome seed."""
 from datoso_seed_pleasuredome.dats import (
-        KawaksDat,
-        RaineDat,
-        fruit_machine_factory,
-        hbmame_dat_factory,
-        mame_dat_factory,
-    )
+    KawaksDat,
+    PinballDat,
+    RaineDat,
+    fruit_machine_factory,
+    hbmame_dat_factory,
+    mame_dat_factory,
+)
 
 # ruff: noqa: ERA001
 
@@ -82,6 +83,23 @@ actions = {
         {
             'action': 'LoadDatFile',
             '_class': KawaksDat,
+        },
+        {
+            'action': 'DeleteOld',
+            'folder': '{dat_destination}',
+        },
+        {
+            'action': 'Copy',
+            'folder': '{dat_destination}',
+        },
+        {
+            'action': 'SaveToDatabase',
+        },
+    ],
+    '{dat_origin}/Pinball': [
+        {
+            'action': 'LoadDatFile',
+            '_class': PinballDat,
         },
         {
             'action': 'DeleteOld',
