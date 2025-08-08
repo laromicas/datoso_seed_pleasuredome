@@ -1,5 +1,5 @@
 """Rules for the PleasureDome seed."""
-from datoso_seed_pleasuredome.dats import FruitMachinesXMLDat, HomeBrewMameDat, MameDat
+from datoso_seed_pleasuredome.dats import FruitMachinesClrMameDat, FruitMachinesXMLDat, HomeBrewMameDat, MameDat
 
 rules = [
     {
@@ -33,6 +33,7 @@ rules = [
         '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
+        'type': 'xml',
         'rules': [
             {
                 'key': 'name',
@@ -46,6 +47,7 @@ rules = [
         '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
+        'type': 'xml',
         'rules': [
             {
                 'key': 'name',
@@ -59,6 +61,49 @@ rules = [
         '_class': FruitMachinesXMLDat,
         'seed': 'pleasuredome',
         'priority': 50,
+        'type': 'xml',
+        'rules': [
+            {
+                'key': 'name',
+                'operator': 'contains',
+                'value': 'SWP Machine',
+            },
+        ],
+    },
+    {
+        'name': 'PleasureDome DATs',
+        '_class': FruitMachinesClrMameDat,
+        'seed': 'pleasuredome',
+        'priority': 50,
+        'type': 'clrmamepro',
+        'rules': [
+            {
+                'key': 'name',
+                'operator': 'contains',
+                'value': 'Fruit Machine',
+            },
+        ],
+    },
+    {
+        'name': 'PleasureDome DATs',
+        '_class': FruitMachinesClrMameDat,
+        'seed': 'pleasuredome',
+        'priority': 50,
+        'type': 'clrmamepro',
+        'rules': [
+            {
+                'key': 'name',
+                'operator': 'contains',
+                'value': 'FruitMachine',
+            },
+        ],
+    },
+    {
+        'name': 'PleasureDome DATs',
+        '_class': FruitMachinesClrMameDat,
+        'seed': 'pleasuredome',
+        'priority': 50,
+        'type': 'clrmamepro',
         'rules': [
             {
                 'key': 'name',
