@@ -13,11 +13,11 @@ from typing import ClassVar
 from urllib.parse import urljoin
 
 import dateutil.parser
-
 from datoso.configuration import config
 from datoso.configuration.folder_helper import Folders
 from datoso.helpers.download import downloader
 from datoso.helpers.file_utils import move_path
+
 from datoso_seed_pleasuredome import __prefix__
 
 # ruff: noqa: ERA001
