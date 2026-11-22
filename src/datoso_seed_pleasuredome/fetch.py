@@ -166,7 +166,6 @@ class PleasureDomeHelper:
         path = self.folder_helper.dats / name
         for file in files:
             filepath = path / file
-            filename = str(filepath)
             with zipfile.ZipFile(filepath, 'r') as zip_ref:
                 zip_ref.extractall(path)
             # filepath.unlink()
