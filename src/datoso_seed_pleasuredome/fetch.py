@@ -15,7 +15,7 @@ from urllib.parse import urljoin
 import dateutil.parser
 from datoso.configuration import config
 from datoso.configuration.folder_helper import Folders
-from datoso.helpers.download import downloader
+from datoso.helpers.download import DownloadProgress, downloader
 from datoso.helpers.file_utils import move_path
 
 from datoso_seed_pleasuredome import __prefix__
@@ -130,10 +130,10 @@ class PleasureDomeHelper:
         parser.feed(str(pleasurehtml))
         return parser.dats
 
-    def download_dat(self, href: str, folder: str) -> None:
+    def download_dat(self, href: str, folder: str, progress: DownloadProgress) -> None:
         """Download a DAT file."""
         filename = Path(href).name.replace('%20', ' ')
-        downloader(url=href, destination=self.folder_helper.dats / folder / filename, reporthook=None)
+        downloader(url=href, destination=self.folder_helper.dats / folder / filename, progress=progress)
 
     def extract_date(self, filename: str) -> datetime:
         """Extract date from filename."""
@@ -208,9 +208,10 @@ class PleasureDomeHelper:
             links = self.get_dat_links(name, url)
 
             print(f'Downloading {name} DAT files')
-            with ThreadPoolExecutor(max_workers=10) as executor:
+            with DownloadProgress(total=len(links), description=f'{name}: {len(links)} DAT file(s)') as progress, \
+                    ThreadPoolExecutor(max_workers=10) as executor:
                 futures = [
-                    executor.submit(self.download_dat, href, name) for href in links
+                    executor.submit(self.download_dat, href, name, progress) for href in links
                 ]
                 for future in futures:
                     future.result()
